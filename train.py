@@ -297,7 +297,7 @@ def structured_pruning(model, pruning_ratio, layer_type):
             num_remove = min(num_remove, module.aux_weight.data.shape[0]-1)
             indices = torch.sort(metric_vector).indices
             zero_indices = indices[:num_remove]
-            module.aux_weight.data[zero_indices] = 0.0
+            module.mask[zero_indices] = 0.0
     print(thres)
 
 def main():
