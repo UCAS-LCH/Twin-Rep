@@ -25,8 +25,6 @@ parser.add_argument('--epochs', type=int, default=100, metavar='N',
                     help='number of epochs to train')
 parser.add_argument('--weight-decay', '--wd', default=2e-4,
                     type=float, metavar='W')
-parser.add_argument('--score-decay', '--sd', default=2e-4,
-                    type=float, metavar='W')
 parser.add_argument('--lr', type=float, default=0.1, metavar='LR',
                     help='learning rate')
 parser.add_argument('--momentum', type=float, default=0.9, metavar='M',
@@ -304,20 +302,7 @@ def main():
     cl, ll = get_layers(args.layer_type)
     model = models.__dict__[args.model](conv_layer=cl, linear_layer=ll, num_classes=num_class).to(device)
     #model = nn.DataParallel(model)
-    score_params = [v for n, v in model.named_parameters() if 'popup_score' in n and v.requires_grad]
-    weight_params = [v for n, v in model.named_parameters() if 'popup_score' not in n and v.requires_grad]
-    optimizer = torch.optim.SGD(
-        [
-            {
-                "params": score_params,
-                "weight_decay": args.score_decay
-            },
-            {"params": weight_params, "weight_decay": args.weight_decay},
-        ],
-        lr=args.lr,
-        momentum=args.momentum,
-        weight_decay=args.weight_decay,
-    )
+    optimizer = optim.SGD(model.parameters(), lr=args.lr, momentum=args.momentum, weight_decay=args.weight_decay)
     best_acc = 0
     best_acc_pgd = 0
     saved_model = '{}_{}_{}_{}_{}_{}_{}_{}_{}_{}.pt'.format(args.model, args.dataset, args.score_decay, args.weight_decay, args.layer_type, args.mode, args.pruning, args.pruning_epoch, datamode, args.pruning_type)
