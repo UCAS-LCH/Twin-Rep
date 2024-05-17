@@ -74,18 +74,20 @@ def subnet_to_dense(subnet_dict, layer_type):
     if layer_type == 'dense':
         dense = subnet_dict
         return dense
-    if layer_type == 'mask':
-        for (k, v) in subnet_dict.items():
-            if "mask" in k:
-                dense[k.replace("mask", "weight")] = (
-                        subnet_dict[k.replace("mask", "weight")] * v)
-        return dense
+        
     # load dense variables
     for (k, v) in subnet_dict.items():
         if "aux_weight" not in k and "mask" not in k:
             dense[k] = v
 
     # update dense variables
+    if layer_type == 'mask':
+        for (k, v) in subnet_dict.items():
+            if "mask" in k:
+                dense[k.replace("mask", "weight")] = (
+                        subnet_dict[k.replace("mask", "weight")] * v)
+        return dense
+        
     for (k, v) in subnet_dict.items():
         if "aux_weight" in k:
             if layer_type == 'twin':
